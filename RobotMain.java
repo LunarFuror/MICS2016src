@@ -46,13 +46,19 @@ public class RobotMain {
 			}
 			
 			if(x>140){
-				pilot.rotate(10);
+				pilot.rotate(360, true);
+				while(x>140){}
+				pilot.stop();
 			}
 			else if(x<100){
-				pilot.rotate(-10);
+				pilot.rotate(-360, true);
+				while(x<100){}
+				pilot.stop();
 			}
 			else if(y<190){
-				pilot.travel(30);
+				pilot.travel(100);
+				while(y<190){}
+				pilot.stop();
 			}
 			else{
 				booper.rotate(360);
@@ -60,5 +66,6 @@ public class RobotMain {
 			
 		}
 		booper.close();
+		pixy.close();
 	}
 }
