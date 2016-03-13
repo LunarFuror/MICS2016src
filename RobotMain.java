@@ -13,9 +13,12 @@ import lejos.robotics.chassis.WheeledChassis;
 import lejos.robotics.navigation.MovePilot;
 
 public class RobotMain {
-
+	static int x = 0;
+	static int y = 0;
+	static int h = 0;
+	static int w = 0;
 	public static void main(String[] args) {
-		LegoPixy pixy = new LegoPixy(SensorPort.S4);
+		final LegoPixy pixy = new LegoPixy(SensorPort.S4);
 		EV3MediumRegulatedMotor booper = new EV3MediumRegulatedMotor(MotorPort.B);
 		NXTRegulatedMotor camPan = new NXTRegulatedMotor(MotorPort.C);
 		booper.setSpeed(booper.getMaxSpeed());
@@ -24,34 +27,45 @@ public class RobotMain {
 		Wheel wheel2 = WheeledChassis.modelWheel(new EV3LargeRegulatedMotor(MotorPort.A), 49.5).offset(65);
 		Chassis chassis = new WheeledChassis(new Wheel[] { wheel1, wheel2 }, 2);
 		MovePilot pilot = new MovePilot(chassis);
+		pilot.setAngularSpeed(45);
+		
+		//this is supposed to update xy outside of everything
+		Thread th = new Thread(){
+			public void run(){
+				while(!Button.ENTER.isDown()){
+					PixyRectangle ball = pixy.getBiggestBlob();
+					x = ball.x;
+					y = ball.y;
+					w = ball.width;
+					h = ball.height;
+					
+					LCD.clearDisplay();
+					LCD.drawInt(w, 1, 1);
+					LCD.drawInt(h, 1, 2);
+					LCD.drawInt(x, 1, 3);
+					LCD.drawInt(y, 1, 4);
+					
+					try {
+						Thread.sleep(300);
+					} catch (InterruptedException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+				}
+			}
+		};
+		//start that shit
+		th.start();
 		
 		while (!Button.ENTER.isDown()) {
-			//camPan.rotateTo(180); //move cam up or down
-			//booper.rotateTo(360); //one full boop
-			PixyRectangle ball = pixy.getBiggestBlob();
-			int w = ball.width;
-			int h = ball.height;
-			int x = ball.x;
-			int y = ball.y;
-			LCD.clearDisplay();
-			LCD.drawInt(w, 1, 1);
-			LCD.drawInt(h, 1, 2);
-			LCD.drawInt(x, 1, 3);
-			LCD.drawInt(y, 1, 4);
-			try {
-				Thread.sleep(300);
-			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			
+			//deal with x and y
 			if(x>140){
-				pilot.rotate(360, true);
+				pilot.rotateLeft();
 				while(x>140){}
 				pilot.stop();
 			}
 			else if(x<100){
-				pilot.rotate(-360, true);
+				pilot.rotateRight();
 				while(x<100){}
 				pilot.stop();
 			}
@@ -63,7 +77,6 @@ public class RobotMain {
 			else{
 				booper.rotate(360);
 			}
-			
 		}
 		booper.close();
 		pixy.close();
