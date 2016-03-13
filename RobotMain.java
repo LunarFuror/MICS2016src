@@ -27,7 +27,6 @@ public class RobotMain {
 		Wheel wheel2 = WheeledChassis.modelWheel(new EV3LargeRegulatedMotor(MotorPort.A), 49.5).offset(65);
 		Chassis chassis = new WheeledChassis(new Wheel[] { wheel1, wheel2 }, 2);
 		MovePilot pilot = new MovePilot(chassis);
-		pilot.setAngularSpeed(45);
 		
 		//this is supposed to update xy outside of everything
 		Thread th = new Thread(){
