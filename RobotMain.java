@@ -18,16 +18,16 @@ public class RobotMain {
 		NXTRegulatedMotor camPan = new NXTRegulatedMotor(MotorPort.C);
 		booper.setSpeed(booper.getMaxSpeed());
 		
-		AtomicInteger x = new AtomicInteger(0);
-		AtomicInteger y = new AtomicInteger(0);
-		AtomicInteger w = new AtomicInteger(0);
-		AtomicInteger h = new AtomicInteger(0);
+		final AtomicInteger x = new AtomicInteger(0);
+		final AtomicInteger y = new AtomicInteger(0);
+		final AtomicInteger w = new AtomicInteger(0);
+		final AtomicInteger h = new AtomicInteger(0);
 		
 		Wheel wheel1 = WheeledChassis.modelWheel(new EV3LargeRegulatedMotor(MotorPort.D), 49.5).offset(-65);
 		Wheel wheel2 = WheeledChassis.modelWheel(new EV3LargeRegulatedMotor(MotorPort.A), 49.5).offset(65);
 		Chassis chassis = new WheeledChassis(new Wheel[] { wheel1, wheel2 }, 2);
 		MovePilot pilot = new MovePilot(chassis);
-		
+		pilot.setAngularSpeed(45);
 		//this is supposed to update xy outside of everything
 		Thread th = new Thread(){
 			public void run(){
@@ -45,7 +45,7 @@ public class RobotMain {
 					LCD.drawString("H:" + h.get(), 0, 4);
 					
 					try {
-						Thread.sleep(300);
+						Thread.sleep(200);
 					} catch (InterruptedException e) {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
@@ -59,7 +59,7 @@ public class RobotMain {
 		while (th.isAlive()) {
 			//deal with x and y
 			if(x.get()>140){
-				pilot.rotate(360, true);
+				pilot.rotateLeft();
 				while(pilot.isMoving()){
 					if(x.get()>140){}
 					else
@@ -67,7 +67,7 @@ public class RobotMain {
 				}
 			}
 			else if(x.get()<100){
-				pilot.rotate(-360, true);
+				pilot.rotateRight();
 				while(pilot.isMoving()){
 				if(x.get()<100){}
 				else
@@ -75,7 +75,7 @@ public class RobotMain {
 				}
 			}
 			else if(y.get()<190){
-				pilot.travel(100);
+				pilot.forward();
 				while(pilot.isMoving()){
 					if(y.get()<190){}
 					else
