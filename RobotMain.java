@@ -1,6 +1,5 @@
-import lejos.ev3.tools.LCDDisplay;
+import java.util.concurrent.atomic.AtomicInteger;
 import lejos.hardware.Button;
-import lejos.hardware.lcd.GraphicsLCD;
 import lejos.hardware.lcd.LCD;
 import lejos.hardware.motor.EV3LargeRegulatedMotor;
 import lejos.hardware.motor.EV3MediumRegulatedMotor;
@@ -13,15 +12,16 @@ import lejos.robotics.chassis.WheeledChassis;
 import lejos.robotics.navigation.MovePilot;
 
 public class RobotMain {
-	static int x = 0;
-	static int y = 0;
-	static int h = 0;
-	static int w = 0;
 	public static void main(String[] args) {
 		final LegoPixy pixy = new LegoPixy(SensorPort.S4);
 		EV3MediumRegulatedMotor booper = new EV3MediumRegulatedMotor(MotorPort.B);
 		NXTRegulatedMotor camPan = new NXTRegulatedMotor(MotorPort.C);
 		booper.setSpeed(booper.getMaxSpeed());
+		
+		AtomicInteger x = new AtomicInteger(0);
+		AtomicInteger y = new AtomicInteger(0);
+		AtomicInteger w = new AtomicInteger(0);
+		AtomicInteger h = new AtomicInteger(0);
 		
 		Wheel wheel1 = WheeledChassis.modelWheel(new EV3LargeRegulatedMotor(MotorPort.D), 49.5).offset(-65);
 		Wheel wheel2 = WheeledChassis.modelWheel(new EV3LargeRegulatedMotor(MotorPort.A), 49.5).offset(65);
@@ -33,16 +33,16 @@ public class RobotMain {
 			public void run(){
 				while(!Button.ENTER.isDown()){
 					PixyRectangle ball = pixy.getBiggestBlob();
-					x = ball.x;
-					y = ball.y;
-					w = ball.width;
-					h = ball.height;
+					x.set(ball.x);
+					y.set(ball.y);
+					w.set(ball.width);
+					h.set(ball.height);
 					
 					LCD.clearDisplay();
-					LCD.drawInt(w, 1, 1);
-					LCD.drawInt(h, 1, 2);
-					LCD.drawInt(x, 1, 3);
-					LCD.drawInt(y, 1, 4);
+					LCD.drawString("X:" + x.get(), 0, 1);
+					LCD.drawString("Y:" + y.get(), 0, 2);
+					LCD.drawString("W:" + w.get(), 0, 3);
+					LCD.drawString("H:" + h.get(), 0, 4);
 					
 					try {
 						Thread.sleep(300);
@@ -56,22 +56,31 @@ public class RobotMain {
 		//start that shit
 		th.start();
 		
-		while (!Button.ENTER.isDown()) {
+		while (th.isAlive()) {
 			//deal with x and y
-			if(x>140){
-				pilot.rotateLeft();
-				while(x>140){}
-				pilot.stop();
+			if(x.get()>140){
+				pilot.rotate(360, true);
+				while(pilot.isMoving()){
+					if(x.get()>140){}
+					else
+						pilot.stop();
+				}
 			}
-			else if(x<100){
-				pilot.rotateRight();
-				while(x<100){}
-				pilot.stop();
+			else if(x.get()<100){
+				pilot.rotate(-360, true);
+				while(pilot.isMoving()){
+				if(x.get()<100){}
+				else
+					pilot.stop();
+				}
 			}
-			else if(y<190){
+			else if(y.get()<190){
 				pilot.travel(100);
-				while(y<190){}
-				pilot.stop();
+				while(pilot.isMoving()){
+					if(y.get()<190){}
+					else
+						pilot.stop();
+				}
 			}
 			else{
 				booper.rotate(360);
