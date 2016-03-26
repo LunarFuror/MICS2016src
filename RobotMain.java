@@ -35,8 +35,8 @@ public class RobotMain {
 					LCD.drawString("Y :" + ball.y, 0, 2);
 					LCD.drawString("W :" + ball.width, 0, 3);
 					LCD.drawString("H :" + ball.height, 0, 4);
-					LCD.drawString("CX:" + ball.x + (ball.width/2), 0, 3);
-					LCD.drawString("CY:" + ball.y + (ball.height/2), 0, 4);
+					LCD.drawString("CX:" + (ball.x + (ball.width/2)), 0, 5);
+					LCD.drawString("CY:" + (ball.y + (ball.height/2)), 0, 6);
 					
 					try {
 						Thread.sleep(200);
