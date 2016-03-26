@@ -15,34 +15,28 @@ public class RobotMain {
 	public static void main(String[] args) {
 		final LegoPixy pixy = new LegoPixy(SensorPort.S4);
 		EV3MediumRegulatedMotor booper = new EV3MediumRegulatedMotor(MotorPort.B);
-		NXTRegulatedMotor camPan = new NXTRegulatedMotor(MotorPort.C);
+		EV3MediumRegulatedMotor camPan = new EV3MediumRegulatedMotor(MotorPort.C);
 		booper.setSpeed(booper.getMaxSpeed());
-		
-		final AtomicInteger x = new AtomicInteger(0);
-		final AtomicInteger y = new AtomicInteger(0);
-		final AtomicInteger w = new AtomicInteger(0);
-		final AtomicInteger h = new AtomicInteger(0);
 		
 		Wheel wheel1 = WheeledChassis.modelWheel(new EV3LargeRegulatedMotor(MotorPort.D), 49.5).offset(-65);
 		Wheel wheel2 = WheeledChassis.modelWheel(new EV3LargeRegulatedMotor(MotorPort.A), 49.5).offset(65);
 		Chassis chassis = new WheeledChassis(new Wheel[] { wheel1, wheel2 }, 2);
 		MovePilot pilot = new MovePilot(chassis);
 		pilot.setAngularSpeed(45);
+		final PixyRectangle ball = pixy.getBiggestBlob();
 		//this is supposed to update xy outside of everything
 		Thread th = new Thread(){
 			public void run(){
 				while(!Button.ENTER.isDown()){
-					PixyRectangle ball = pixy.getBiggestBlob();
-					x.set(ball.x);
-					y.set(ball.y);
-					w.set(ball.width);
-					h.set(ball.height);
+					ball.setRect(pixy.getBiggestBlob());
 					
 					LCD.clearDisplay();
-					LCD.drawString("X:" + x.get(), 0, 1);
-					LCD.drawString("Y:" + y.get(), 0, 2);
-					LCD.drawString("W:" + w.get(), 0, 3);
-					LCD.drawString("H:" + h.get(), 0, 4);
+					LCD.drawString("X :" + ball.x, 0, 1);
+					LCD.drawString("Y :" + ball.y, 0, 2);
+					LCD.drawString("W :" + ball.width, 0, 3);
+					LCD.drawString("H :" + ball.height, 0, 4);
+					LCD.drawString("CX:" + ball.x + (ball.width/2), 0, 3);
+					LCD.drawString("CY:" + ball.y + (ball.height/2), 0, 4);
 					
 					try {
 						Thread.sleep(200);
@@ -57,6 +51,7 @@ public class RobotMain {
 		th.start();
 		
 		while (th.isAlive()) {
+			/*
 			//deal with x and y
 			if(x.get()>140){
 				pilot.rotateLeft();
@@ -85,6 +80,7 @@ public class RobotMain {
 			else{
 				booper.rotate(360);
 			}
+			*/
 		}
 		booper.close();
 		pixy.close();
