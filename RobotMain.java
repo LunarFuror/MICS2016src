@@ -1,4 +1,5 @@
 import lejos.hardware.Button;
+import lejos.hardware.lcd.LCD;
 import lejos.hardware.motor.EV3LargeRegulatedMotor;
 import lejos.hardware.motor.EV3MediumRegulatedMotor;
 import lejos.hardware.port.MotorPort;
@@ -35,6 +36,12 @@ public class RobotMain {
 		while(Button.ENTER.isUp())
 		{
 			PixyRectangle rec = pixy.getBiggestBlob();
+			LCD.clearDisplay();
+			LCD.drawString("X :" + rec.getCenterX(), 0, 1);
+			LCD.drawString("Y :" + rec.getCenterY(), 0, 2);
+			LCD.drawString("W :" + rec.getWidth(), 0, 3);
+			LCD.drawString("H :" + rec.getHeight(), 0, 4);
+			LCD.drawString("PHASE :" + p.toString(), 0, 6);
 			//center the ball before moving
 			if(p == Phase.CENTER){
 				if (rec.getCenterX() < CENTER - LEFT_DEADZONE)
@@ -57,8 +64,17 @@ public class RobotMain {
 				//determine roughly how far away it is now that we're centered
 				//move that distance
 				//check centered
-				//if centered check distance
-				//if close and centered move cam down OR go through process of booping, unsure if we need to move cam honestly.
+				if (rec.getCenterX() < CENTER - LEFT_DEADZONE || rec.getCenterX() > CENTER + RIGHT_DEADZONE){
+					p = Phase.CENTER;
+				}
+				//check distance
+				else if(rec.getCenterY() > 10){
+					p = Phase.APPROACH;
+				}
+				//both good, better boop it.
+				else{
+					p = Phase.BOOP;
+				}
 			}
 			
 			//Ball centered AND close? Then the cam is down and we need to boop.
